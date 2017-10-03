@@ -1,21 +1,28 @@
 function New-WebListener {
-    [CmdletBinding()]param(
-        [String]$Protocol,
-        [String][Alias('Hostname')]$IPAddress,
-        [Int]$Port
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$false, HelpMessage="HTTP or HTTPS?")][ValidateSet("http","https")][String]$Protocol,
+        [Parameter(Mandatory=$false)][String][Alias('Hostname')]$IPAddress,
+        [Parameter(Mandatory=$false)][Int]$Port
     )
 
     BEGIN {
-
+        if (!($Protocol)) {
+            $Protocol = 'http'
+        }
+        if (!($IPAddress)) {
+            $IPAddress = '127.0.0.1'
+        }
+        if (!($Port)) {
+            $Port = 8080
+        }
         $URL = "$Protocol"+"://$IPAddress"+":$Port/"
         $Root = Split-Path -Parent $PSCommandPath
     }
 
     PROCESS {
 
-        # Add routes (Get, Post, etc)
-        # Route should include a path
-        # The page at the path should be served
+        # Add routes (GET, POST, PUT, DELETE)
 
         # Spin up a new HTTP Listener
         $Listener = New-Object System.Net.HttpListener
