@@ -1,4 +1,4 @@
-function New-WebListener {
+function Start-WebListener {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$false, HelpMessage="HTTP or HTTPS?")][ValidateSet("http","https")][String]$Protocol,
@@ -7,6 +7,9 @@ function New-WebListener {
     )
 
     BEGIN {
+        # Load the Router
+        . .\Private\Router.ps1
+
         if (!($Protocol)) {
             $Protocol = 'http'
         }
@@ -23,8 +26,6 @@ function New-WebListener {
 
     PROCESS {
 
-        # Add routes (GET, POST, PUT, DELETE)
-
         # Spin up a new HTTP Listener
         $Listener = New-Object System.Net.HttpListener
         $Listener.Prefixes.Add($URL)
@@ -38,45 +39,29 @@ function New-WebListener {
             $ContextRequest = $Listener.GetContextAsync()
             
             # Check every 30ms if a request has been received
-            while($ContextRequest.IsCompleted -ne $True -and $ContextRequest.IsCanceled -ne $True -and $ContextRequest.IsFaulted -ne $True -and $exit -ne $True) {
+            while($ContextRequest.IsCompleted -ne $True -and $ContextRequest.IsCanceled -ne $True -and $ContextRequest.IsFaulted -ne $True -and $Exit -ne $True) {
                 [System.Threading.Thread]::Sleep(30)
                 
                 # Process Ctrl+C
-                if($Host.UI.RawUI.KeyAvailable -and (3 -eq  [int]$Host.UI.RawUI.ReadKey("AllowCtrlC,IncludeKeyUp,NoEcho").Character)) {
+                if($Host.UI.RawUI.KeyAvailable -and (3 -eq [int]$Host.UI.RawUI.ReadKey("AllowCtrlC,IncludeKeyUp,NoEcho").Character)) {
                     Write-Output "Stopping Listener..."
-                    $Listener.Stop()
-                    break
+                    $Listener.Abort()
+                    Break
                 }
             }
             
             # Request Handler
             $Context = $ContextRequest.Result
             $Request = $Context.Request
+            $RequestType = $Request.HttpMethod
             $RequestURL = $Request.RawUrl
-
-            # Default to Index
-            if ($RequestURL -eq '' -or $RequestURL -eq '/') {
-                $RequestURL = '/index.html'
-            }
 
             # Response Handler
             $Response = $Context.Response
             $Response.Headers.Add("Content-Type","text/html")
-            $Response.StatusCode = 200 #only if it's successful
 
-            $PageURL = ([System.Uri]$RequestURL).LocalPath
-            if (Test-Path "$Root\views$RequestURL") {
-                Write-Output "Page found: $RequestURL"
-                $PageContent = Get-Content ("$Root\views$RequestURL")
-            } else {
-                Write-Output "Page not found: 404: $RequestURL"
-                $PageContent = Get-Content ("$Root\views\errorpages\404.html")
-            }
-            $ResponseBuffer = [System.Text.Encoding]::UTF8.GetBytes($PageContent)
-            $Response.ContentLength64 = $ResponseBuffer.Length
-            $Response.OutputStream.Write($ResponseBuffer,0,$ResponseBuffer.Length)
-            $Response.Close()
-
+            # Let Router handle the logic
+            Router $RequestType $RequestURL
         }
         
         # Close the listener
