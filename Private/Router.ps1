@@ -14,7 +14,7 @@ function Router {
         if (Test-Path -PathType Leaf -Path "$Root\views$RequestURL") {
 
             if ($($Route.RequestURL) -notmatch 'favicon') {
-                Write-Output "Page found: $RequestURL"
+                Write-Verbose "Page found: $RequestURL"
                 $Response.StatusCode = 200
             }
 
@@ -22,13 +22,13 @@ function Router {
 
         } elseif (($Route.ServePage) -and (Test-Path -PathType Leaf -Path "$Root\views\$($Route.ServePage)")) {
 
-            Write-Output "Page found: $($Route.ServePage)"
+            Write-Verbose "Page found: $($Route.ServePage)"
             $Response.StatusCode = 200
             $PageContent = Get-Content ("$Root\views$($Route.ServePage)")
 
         } else {
 
-            Write-Output "Page not found: 404: $RequestURL"
+            Write-Verbose "Page not found: 404: $RequestURL"
             $Response.StatusCode = 404
             $PageContent = Get-Content ("$Root\views\errorpages\404.html")
 
