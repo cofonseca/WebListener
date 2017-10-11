@@ -11,14 +11,14 @@ function Router {
     # GET
     if ($RequestType -eq 'GET') {
 
-        if (Test-Path -PathType Leaf -Path "$Root\views$($Route.RequestURL)") {
+        if (Test-Path -PathType Leaf -Path "$Root\views$RequestURL") {
 
             if ($($Route.RequestURL) -notmatch 'favicon') {
-                Write-Output "Page found: $($Route.RequestURL)"
+                Write-Output "Page found: $RequestURL"
                 $Response.StatusCode = 200
             }
 
-            $PageContent = Get-Content ("$Root\views$($Route.RequestURL)")
+            $PageContent = Get-Content ("$Root\views$RequestURL")
 
         } elseif (($Route.ServePage) -and (Test-Path -PathType Leaf -Path "$Root\views\$($Route.ServePage)")) {
 
