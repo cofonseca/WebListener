@@ -53,7 +53,6 @@ function New-WebListener {
             $Context = $ContextRequest.Result
             $Request = $Context.Request
             $RequestURL = $Request.RawUrl
-            Write-Output $RequestURL
 
             # Default to Index
             if ($RequestURL -eq '' -or $RequestURL -eq '/') {
@@ -65,10 +64,14 @@ function New-WebListener {
             $Response.Headers.Add("Content-Type","text/html")
             $Response.StatusCode = 200 #only if it's successful
 
-            #get the end of the url as the page/path and inject it into the page variable
-
             $PageURL = ([System.Uri]$RequestURL).LocalPath
-            $PageContent = Get-Content ("$Root\views$RequestURL")
+            if (Test-Path "$Root\views$RequestURL") {
+                Write-Output "Page found: $RequestURL"
+                $PageContent = Get-Content ("$Root\views$RequestURL")
+            } else {
+                Write-Output "Page not found: 404: $RequestURL"
+                $PageContent = Get-Content ("$Root\views\errorpages\404.html")
+            }
             $ResponseBuffer = [System.Text.Encoding]::UTF8.GetBytes($PageContent)
             $Response.ContentLength64 = $ResponseBuffer.Length
             $Response.OutputStream.Write($ResponseBuffer,0,$ResponseBuffer.Length)
