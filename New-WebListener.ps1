@@ -18,6 +18,10 @@ function New-WebListener {
         }
         $URL = "$Protocol"+"://$IPAddress"+":$Port/"
         $Root = Split-Path -Parent $PSCommandPath
+        
+        # Save old Ctrl+C behavior
+        $oldTreatControlCAsInput = [System.Console]::TreatControlCAsInput
+        # Process Ctrl+C as input
     }
 
     PROCESS {
@@ -29,11 +33,31 @@ function New-WebListener {
         $Listener.Prefixes.Add($URL)
         $Listener.Start()
         Write-Output "Starting Listener at $URL..."
+        $Exit = $False
 
         while ($Listener.IsListening) {
-
+            
+            # Use async request to avoid blocking the current thread
+            $ContextRequest = $Listener.GetContextAsync()
+            
+            # Check every 30ms if a request has been received
+            while($ContextRequest.IsCompleted -ne $True -and $ContextRequest.IsCanceled -ne $True -and $ContextRequest.IsFaulted -ne $True -and $exit -ne $True) {
+                [System.Threading.Thread]::Sleep(30)
+                
+                # Process Ctrl+C
+                if($Host.UI.RawUI.KeyAvailable -and (3 -eq  [int]$Host.UI.RawUI.ReadKey("AllowCtrlC,IncludeKeyUp,NoEcho").Character)) {
+                    Write-Output "Ctrl+C received"
+                    $Exit = $True
+                }
+            }
+            
+            if($Exit) {
+                Write-Output "Exiting..."
+                break
+            }
+            
             # Request Handler
-            $Context = $Listener.GetContext()
+            $Context = $ContextRequest.Result
             $Request = $Context.Request
             $RequestURL = $Request.Url.OriginalString
             Write-Output $RequestURL
@@ -53,7 +77,8 @@ function New-WebListener {
             $Response.Close()
 
         }
-
+        
+        # Close the listener
+        $Listener.Close()
     }
-
 }
