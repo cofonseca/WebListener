@@ -19,9 +19,11 @@ function New-WebListener {
         $URL = "$Protocol"+"://$IPAddress"+":$Port/"
         $Root = Split-Path -Parent $PSCommandPath
         
+        <#
         # Save old Ctrl+C behavior
         $oldTreatControlCAsInput = [System.Console]::TreatControlCAsInput
         # Process Ctrl+C as input
+        #>
     }
 
     PROCESS {
@@ -46,21 +48,22 @@ function New-WebListener {
                 
                 # Process Ctrl+C
                 if($Host.UI.RawUI.KeyAvailable -and (3 -eq  [int]$Host.UI.RawUI.ReadKey("AllowCtrlC,IncludeKeyUp,NoEcho").Character)) {
-                    Write-Output "Ctrl+C received"
-                    $Exit = $True
+                    Write-Output "Stopping Listener..."
+                    $Listener.Stop()
+                    break
                 }
-            }
-            
-            if($Exit) {
-                Write-Output "Exiting..."
-                break
             }
             
             # Request Handler
             $Context = $ContextRequest.Result
             $Request = $Context.Request
-            $RequestURL = $Request.Url.OriginalString
+            $RequestURL = $Request.RawUrl
             Write-Output $RequestURL
+
+            # Default to Index
+            if ($RequestURL -eq '' -or $RequestURL -eq '/') {
+                $RequestURL = '/index.html'
+            }
 
             # Response Handler
             $Response = $Context.Response
@@ -70,7 +73,7 @@ function New-WebListener {
             #get the end of the url as the page/path and inject it into the page variable
 
             $PageURL = ([System.Uri]$RequestURL).LocalPath
-            $PageContent = Get-Content ("$Root\views$PageURL")
+            $PageContent = Get-Content ("$Root\views$RequestURL")
             $ResponseBuffer = [System.Text.Encoding]::UTF8.GetBytes($PageContent)
             $Response.ContentLength64 = $ResponseBuffer.Length
             $Response.OutputStream.Write($ResponseBuffer,0,$ResponseBuffer.Length)
