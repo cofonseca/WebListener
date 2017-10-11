@@ -56,12 +56,15 @@ function Start-WebListener {
             $RequestType = $Request.HttpMethod
             $RequestURL = $Request.RawUrl
 
-            # Response Handler
-            $Response = $Context.Response
-            $Response.Headers.Add("Content-Type","text/html")
+            if ($Context) {
+                # Response Handler
+                $Response = $Context.Response
+                $Response.Headers.Add("Content-Type","text/html")
 
-            # Let Router handle the logic
-            Router $RequestType $RequestURL
+                # Let Router handle the logic
+                Router $RequestType $RequestURL
+            }
+            
         }
         
         # Close the listener
