@@ -19,11 +19,6 @@ function New-WebListener {
         $URL = "$Protocol"+"://$IPAddress"+":$Port/"
         $Root = Split-Path -Parent $PSCommandPath
         
-        <#
-        # Save old Ctrl+C behavior
-        $oldTreatControlCAsInput = [System.Console]::TreatControlCAsInput
-        # Process Ctrl+C as input
-        #>
     }
 
     PROCESS {
