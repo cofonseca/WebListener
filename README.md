@@ -22,7 +22,7 @@ To add a route, open up '*Routes.ps1*', and add a new hashtable to the array. Yo
 @{
     'RequestType' = 'GET'
     'RequestURL' = '/'
-    'ServePage' = '/index.html'
+    'RedirectURL' = '/index.html'
     'ScriptBlock = {}
 }
 ```
@@ -31,7 +31,7 @@ To add a route, open up '*Routes.ps1*', and add a new hashtable to the array. Yo
 
 ***RequestURL*** is the URL that the router will respond to. For example, to create a route for /index, enter '/index'.
 
-***ServePage*** is the full path to the file that will be served when a request for the RequestURL is made. If the filepath is the same as the RequestURL, this can be left blank or excluded.
+***RedirectURL*** is the full path to the file that will be served when a request for the RequestURL is made. If the filepath is the same as the RequestURL, this can be left blank or excluded.
 
 ***ScriptBlock*** allows you to run PowerShell code when a URL is requested. If you don't want to run anything, leave this blank, or exclude it.
 

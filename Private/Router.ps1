@@ -20,11 +20,11 @@ function Router {
 
             $PageContent = Get-Content ("$Root\views$RequestURL")
 
-        } elseif (($Route.ServePage) -and (Test-Path -PathType Leaf -Path "$Root\views\$($Route.ServePage)")) {
+        } elseif (($Route.RedirectURL) -and (Test-Path -PathType Leaf -Path "$Root\views\$($Route.RedirectURL)")) {
 
-            Write-Verbose "Page found: $($Route.ServePage)"
+            Write-Verbose "Page found: $($Route.RedirectURL)"
             $Response.StatusCode = 200
-            $PageContent = Get-Content ("$Root\views$($Route.ServePage)")
+            $PageContent = Get-Content ("$Root\views$($Route.RedirectURL)")
 
         } else {
 
