@@ -20,7 +20,7 @@ function Router {
 
             $PageContent = Get-Content ("$Root\views$RequestURL")
 
-        } elseif (($Route.RedirectURL) -and (Test-Path -PathType Leaf -Path "$Root\views\$($Route.RedirectURL)")) {
+        } elseif ($Route.RedirectURL) {
 
             Write-Verbose "Page found: $($Route.RedirectURL)"
             $Response.StatusCode = 200
@@ -47,7 +47,7 @@ function Router {
 
     # POST
     if ($RequestType -eq 'POST') {
-
+        Write-Output $Context.Request
     }
 
     # PUT
