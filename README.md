@@ -2,10 +2,10 @@
 WebListener is a small, PowerShell-based web server. It was primarily designed for really basic, lightweight use, and for testing simple web apps. One advantage to this is that it's really easy to create a frontend that will allow you to run PowerShell code on the backend, such as a page to display server statistics, or a portal to deploy virtual machines.
 
 ## Getting Started
-To get started, simply import the module, then run New-WebListener.
+To get started, simply import the module, then run Start-WebListener.
 
 ```
-New-WebListener
+Start-WebListener
 ```
 
 Your web server is now live at *http://localhost:8080* !
